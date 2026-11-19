@@ -1,5 +1,5 @@
 {
-  "timestamp": 1795104403436,
+  "timestamp": 1795105172131,
   "contracts": [
     {
       "id": "contract_1790064700810_j6w5e",
@@ -1250,7 +1250,10 @@
       "createdAt": "2026-09-22T10:25:24.987Z",
       "completedAt": null,
       "updatedAt": "2026-09-22T10:25:25.329Z",
-      "isEdited": false
+      "isEdited": false,
+      "latitude": null,
+      "longitude": null,
+      "locationUpdatedAt": null
     },
     {
       "id": "contract_1791618917978_uc19n",
