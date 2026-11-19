@@ -153,8 +153,7 @@ export async function fetchWithFallback(
   const urlsToTry: string[] = [];
 
   if (isNative) {
-    // In native APK / Capacitor environment, NEVER try localhost or relative URLs because there is no API server on the device!
-    // Immediately target the remote cloud servers!
+    // In native APK / Capacitor environment, ONLY target remote cloud servers! NEVER try localhost, 127.0.0.1, or relative paths.
     if (activeWorkingServer && !activeWorkingServer.includes('localhost') && !activeWorkingServer.includes('127.0.0.1')) {
       const activeUrl = `${activeWorkingServer}${cleanEndpoint}`;
       if (!urlsToTry.includes(activeUrl)) urlsToTry.push(activeUrl);
@@ -165,17 +164,12 @@ export async function fetchWithFallback(
       if (!urlsToTry.includes(customUrl)) urlsToTry.push(customUrl);
     }
     for (const server of CANDIDATE_SERVERS) {
-      const candidateUrl = `${server}${cleanEndpoint}`;
-      if (!urlsToTry.includes(candidateUrl)) {
-        urlsToTry.push(candidateUrl);
+      if (server && !server.includes('localhost') && !server.includes('127.0.0.1')) {
+        const candidateUrl = `${server}${cleanEndpoint}`;
+        if (!urlsToTry.includes(candidateUrl)) {
+          urlsToTry.push(candidateUrl);
+        }
       }
-    }
-    if (typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http')) {
-      const originUrl = `${window.location.origin}${cleanEndpoint}`;
-      if (!urlsToTry.includes(originUrl)) urlsToTry.push(originUrl);
-    }
-    if (!urlsToTry.includes(cleanEndpoint)) {
-      urlsToTry.push(cleanEndpoint);
     }
   } else {
     // 1. If in browser / web mode, prefer same-origin URLs only so cross-origin CORS mirrors don't mask real errors

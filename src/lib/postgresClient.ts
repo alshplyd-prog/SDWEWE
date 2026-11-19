@@ -1165,7 +1165,7 @@ export async function loadSnapshotFromIndexedDbIfAvailable(): Promise<boolean> {
     }
 
     // Fallback: If IndexedDB snapshot was empty (e.g. freshly installed APK on mobile),
-    // load bundled initial snapshot so Customer Locations and Appointments are NEVER empty/zeroed on launch!
+    // load bundled initial snapshot or fallback constants so data is NEVER empty on launch!
     try {
       const snapRes = await fetch('/initial_snapshot.json').catch(() => null);
       if (snapRes && snapRes.ok) {
@@ -1192,6 +1192,34 @@ export async function loadSnapshotFromIndexedDbIfAvailable(): Promise<boolean> {
         }
       }
     } catch (bErr) {}
+
+    // Guaranteed TS constant fallback for APK / offline / file protocol where fetch might fail
+    if (getLocalCache('contracts').length === 0) {
+      if (Array.isArray(INITIAL_CONTRACTS) && INITIAL_CONTRACTS.length > 0) {
+        setLocalCache('contracts', INITIAL_CONTRACTS);
+      }
+      if (Array.isArray(INITIAL_APPOINTMENTS) && getLocalCache('appointments').length === 0) {
+        setLocalCache('appointments', INITIAL_APPOINTMENTS);
+      }
+      if (Array.isArray(INITIAL_CUSTOMER_LISTS) && getLocalCache('customer_lists').length === 0) {
+        setLocalCache('customer_lists', INITIAL_CUSTOMER_LISTS);
+      }
+      if (Array.isArray(INITIAL_FUNDS) && getLocalCache('funds').length === 0) {
+        setLocalCache('funds', INITIAL_FUNDS);
+      }
+      if (Array.isArray(DEFAULT_REPS) && getLocalCache('reps').length === 0) {
+        setLocalCache('reps', DEFAULT_REPS);
+      }
+      if (Array.isArray(INITIAL_EMPLOYEES) && getLocalCache('employees').length === 0) {
+        setLocalCache('employees', INITIAL_EMPLOYEES);
+      }
+      if (Array.isArray(INITIAL_INVENTORY) && getLocalCache('inventory').length === 0) {
+        setLocalCache('inventory', INITIAL_INVENTORY);
+      }
+      applyServerClearedLocations();
+      notifySubscribersRefresh();
+      return true;
+    }
   } catch (e) {}
   return false;
 }
